@@ -1,5 +1,6 @@
 import { useContainer } from 'class-validator';
 import helmet from 'helmet';
+import morgan from 'morgan';
 import { Server } from 'http';
 
 import {
@@ -31,6 +32,7 @@ export async function getApp(): Promise<INestApplication | undefined> {
     app.use(helmet());
     app.enableCors();
     app.enableVersioning();
+    app.use(morgan('combined'));
 
     app.useGlobalPipes(
       new ValidationPipe({
