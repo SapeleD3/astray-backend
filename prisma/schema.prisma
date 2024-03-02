@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -11,7 +12,7 @@ datasource db {
 }
 
 model User {
-  id          String @unique @default(uuid())
+  id          String   @unique @default(uuid())
   email       String
   fullName    String
   phoneNumber String
@@ -19,4 +20,50 @@ model User {
   password    String
   createdAt   Int
   updatedAt   Int
+  events      Event[]
+  tickets     Ticket[]
+}
+
+model EventCategory {
+  id        String @unique @default(uuid())
+  name      String @unique
+  createdAt Int
+  updatedAt Int
+
+  events Event[]
+}
+
+model Event {
+  id              String         @unique @default(uuid())
+  createdAt       Int
+  updatedAt       Int
+  name            String
+  address         String
+  country         String
+  description     String
+  endDate         String
+  startDate       String
+  state           String
+  image           String
+  status          String         @default("DRAFT")
+  tickets         Ticket[]
+  User            User?          @relation(fields: [userId], references: [id])
+  userId          String?
+  EventCategory   EventCategory? @relation(fields: [eventCategoryId], references: [id])
+  eventCategoryId String?
+}
+
+model Ticket {
+  id        String  @unique @default(uuid())
+  createdAt Int
+  updatedAt Int
+  name      String
+  quantity  Int
+  price     Float
+  sold      Int     @default(0)
+  soldOut   Boolean @default(false)
+  Event     Event?  @relation(fields: [eventId], references: [id])
+  eventId   String?
+  User      User?   @relation(fields: [userId], references: [id])
+  userId    String?
 }
