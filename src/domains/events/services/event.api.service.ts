@@ -116,6 +116,7 @@ export class EventApiService {
 
   async getUnAuthEvents(filter: GetEventsFilter): Promise<UnauthEventResponse> {
     const selectCriteria = {
+      id: true,
       address: true,
       image: true,
       name: true,
