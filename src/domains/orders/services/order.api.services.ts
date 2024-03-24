@@ -112,7 +112,7 @@ export class OrderApiService {
     // Send email of booking Id
     const mailer = new EmailService();
     await mailer.sendMail({
-      to: 'oyinkuromosesvictor@gmail.com',
+      to: payload.email,
       subject: 'Ticket Purchase',
       html: `<h1>${bookingId}</h1>`,
     });
