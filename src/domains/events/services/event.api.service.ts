@@ -125,7 +125,7 @@ export class EventApiService {
       country: true,
       state: true,
       description: true,
-      tickets: { select: { name: true, price: true, soldOut: true } },
+      tickets: { select: { name: true, price: true, soldOut: true, id: true } },
     };
 
     const whereQuery: any = {};
