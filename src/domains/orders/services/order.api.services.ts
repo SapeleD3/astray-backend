@@ -24,7 +24,6 @@ export class OrderApiService {
   ) {}
 
   async createPaymentReference(
-    userId: string,
     payload: PaymentRequestBody,
   ): Promise<{ ref: string }> {
     const { amount, email } = payload;
@@ -37,7 +36,6 @@ export class OrderApiService {
         ref: paymentRef,
         amount,
         email,
-        userId,
       },
     });
 
@@ -85,7 +83,7 @@ export class OrderApiService {
     };
   }
 
-  async createOrder(userId: string, payload: CreateOrderPayload): Promise<any> {
+  async createOrder(payload: CreateOrderPayload): Promise<any> {
     const [payment, ticket, existingOrder, event] = await Promise.all([
       this.db.payment.findFirst({
         where: { email: payload.email, ref: payload.reference },
@@ -161,7 +159,7 @@ export class OrderApiService {
           ticketId: ticket.id,
           eventId: ticket?.eventId || payload.event,
           status: 'SUCCESS',
-          userId,
+          userId: event?.userId, // owner of the event
         },
       });
     });

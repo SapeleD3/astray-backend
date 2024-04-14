@@ -21,7 +21,6 @@ import {
 import { AuthGuard } from '../../../commons/gaurds/user.authentication.guard';
 import { AuthGuardRequest } from '../../../commons';
 
-@UseGuards(AuthGuard)
 @Controller({
   path: `${RouteTag.API}/${ApiGroup.Order}`,
 })
@@ -31,28 +30,31 @@ export class OrderApiController {
   @Post('')
   @HttpCode(HttpStatus.OK)
   async orderTicket(
-    @Request() request: AuthGuardRequest,
     @Body() createOrderPayload: CreateOrderPayload,
   ): Promise<[]> {
-    const order = this.orderApiService.createOrder(
-      request.id,
-      createOrderPayload,
-    );
+    const order = this.orderApiService.createOrder(createOrderPayload);
     return order;
   }
 
   @Post('/reference')
   @HttpCode(HttpStatus.OK)
   async createPaymentReference(
-    @Request() request: AuthGuardRequest,
     @Body() createPaymentRefPayload: generatePasswordRefDTO,
   ): Promise<{ ref: string }> {
-    const ref = this.orderApiService.createPaymentReference(request.id, {
+    const ref = this.orderApiService.createPaymentReference({
       amount: createPaymentRefPayload.amount,
       email: createPaymentRefPayload.email,
     });
     return ref;
   }
+}
+
+@UseGuards(AuthGuard)
+@Controller({
+  path: `${RouteTag.API}/auth/${ApiGroup.Order}`,
+})
+export class AuthOrderApiController {
+  constructor(private readonly orderApiService: OrderApiService) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
