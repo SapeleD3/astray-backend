@@ -3,6 +3,7 @@ export const OrderTicketTemplate = `<!DOCTYPE html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html charset=UTF-8" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -35,7 +36,7 @@ export const OrderTicketTemplate = `<!DOCTYPE html>
           <p style="font-size: 16px">
             We hope this message finds you bursting with excitement and can't
             wait for you have an awesome experience at
-            <strong>{{eventName}}.</strong>
+            <b>{{eventName}}.</b>
           </p>
 
           <div style="margin-top: 40px">
@@ -61,7 +62,7 @@ export const OrderTicketTemplate = `<!DOCTYPE html>
                 >
                   Booking ID
                 </p>
-                <p style="color: #2b292f; font-size: 14px; font-weight: 500">
+                <p style="color: #2b292f; font-size: 14px; font-weight: 700">
                   {{bookingId}}
                 </p>
               </div>
@@ -79,12 +80,14 @@ export const OrderTicketTemplate = `<!DOCTYPE html>
                     color: #2b292f;
                     font-size: 14px;
                     font-weight: 400;
+                    margin: 0;
+                    text-transform: capitalize;
                   "
                 >
-                  Ticket - {{ticket}} X{{quantity}}
+                  Ticket - {{ticket}} X {{quantity}}
                 </p>
-                <p tyle="color: #2b292f; font-size: 14px; font-weight: 500">
-                  {{total}}
+                <p style="color: #2b292f; font-size: 14px; font-weight: 500; margin: 0;">
+                  ₦{{total}}
                 </p>
               </div>
             </div>
@@ -94,11 +97,11 @@ export const OrderTicketTemplate = `<!DOCTYPE html>
       <tr>
         <td>
           <p style="margin-top: 24px">{{country}} {{state}} - {{address}}</p>
-          <p style="padding: 0px;">{{start}}</p>
+          <p style="padding: 0px">{{start}}</p>
         </td>
       </tr>
       <tr>
-        <td style="margin-top: 40px; display: flex; justify-content: center">
+        <td style="margin-top: 40px; display: flex; justify-content: center; width: 100%;">
           <div>
             <p>Connecting you to experiences that ignite your soul.</p>
             <p style="font-size: 12px; text-align: center">
