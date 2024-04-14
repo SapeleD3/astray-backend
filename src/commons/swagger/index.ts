@@ -1,2 +1,1 @@
-
-export * from './create-document.swagger'
+export * from './create-document.swagger';
