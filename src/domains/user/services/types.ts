@@ -34,3 +34,9 @@ export type SaveAccountDetailsPayload = {
   accountName: string;
   bankName: string;
 };
+
+export type EditUserPayload = {
+  fullName: string;
+  hostName: string;
+  phoneNumber: string;
+};

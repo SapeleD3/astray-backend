@@ -10,6 +10,7 @@ import {
   AuthUser,
   GetNipAccountDetailsPayload,
   SaveAccountDetailsPayload,
+  EditUserPayload,
 } from './types';
 import { PrismaService } from '../../../commons/prisma.service';
 import {
@@ -24,7 +25,7 @@ import {
   Paystack,
   PaystackBankList,
 } from '../../../providers';
-import { VirtualAccount } from '@prisma/client';
+import { User, VirtualAccount } from '@prisma/client';
 
 const excludePassword = (user: any) => {
   delete user.password;
@@ -137,6 +138,24 @@ export class UserService {
     }
 
     return bankDetails;
+  }
+
+  async editUser(
+    userId: string,
+    payload: EditUserPayload,
+  ): Promise<Partial<User>> {
+    const user = await this.db.user.findFirst({ where: { id: userId } });
+
+    if (!user) {
+      throw new UnauthorizedException('invalid token');
+    }
+
+    const edittedUser = await this.db.user.update({
+      where: { id: userId },
+      data: payload,
+    });
+
+    return excludePassword(edittedUser);
   }
 
   async saveAccountDetails(

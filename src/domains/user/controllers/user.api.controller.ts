@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Put,
   Query,
   Request,
   UseGuards,
@@ -13,7 +14,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiGroup } from '../../../commons/enums';
 import {
   AuthUser,
-  GetNipAccountDetailsPayload,
+  EditUserPayload,
   SaveAccountDetailsPayload,
   UserService,
 } from '../services';
@@ -28,7 +29,7 @@ import {
   GetNipAccountDetailsResponse,
   PaystackBankList,
 } from '../../../providers';
-import { VirtualAccount } from '@prisma/client';
+import { User, VirtualAccount } from '@prisma/client';
 
 @ApiTags(ApiGroup.User)
 @Controller(ApiGroup.User)
@@ -98,6 +99,16 @@ export class AuthUserController {
   @HttpCode(HttpStatus.OK)
   async fetchAuthUser(@Request() request: AuthGuardRequest): Promise<AuthUser> {
     const user = await this.userService.fetchAuthUser(request.id);
+    return user;
+  }
+
+  @Put('')
+  @HttpCode(HttpStatus.OK)
+  async editUser(
+    @Request() request: AuthGuardRequest,
+    @Body() editUserPayload: EditUserPayload,
+  ): Promise<Partial<User>> {
+    const user = await this.userService.editUser(request.id, editUserPayload);
     return user;
   }
 
