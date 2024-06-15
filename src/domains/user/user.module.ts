@@ -7,7 +7,7 @@ import { Paystack } from '../../providers';
 @Module({
   imports: [],
   controllers: [UserController, AuthUserController],
-  providers: [UserService, PrismaService, Paystack],
+  providers: [Paystack, UserService, PrismaService],
   exports: [UserService],
 })
 export class UserModule {}
