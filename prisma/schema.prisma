@@ -12,17 +12,31 @@ datasource db {
 }
 
 model User {
-  id          String   @unique @default(uuid())
-  email       String
-  fullName    String
-  phoneNumber String
-  hostName    String
-  password    String
-  createdAt   Int
-  updatedAt   Int
-  events      Event[]
-  tickets     Ticket[]
-  Order       Order[]
+  id             String           @unique @default(uuid())
+  email          String
+  fullName       String
+  phoneNumber    String
+  hostName       String
+  password       String
+  createdAt      Int
+  updatedAt      Int
+  events         Event[]
+  tickets        Ticket[]
+  Order          Order[]
+  VirtualAccount VirtualAccount[]
+}
+
+model VirtualAccount {
+  id               String @unique @default(uuid())
+  accountFullName  String
+  accountNumber    String
+  bankName         String
+  bankCode         String
+  subAccountNumber String
+  createdAt        Int
+  updatedAt        Int
+  user             User   @relation(fields: [userId], references: [id])
+  userId           String
 }
 
 model EventCategory {

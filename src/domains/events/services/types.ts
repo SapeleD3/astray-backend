@@ -57,6 +57,8 @@ export type UnauthEvents = {
   state: string;
   description: string;
   tickets: UnauthEventTicketResponse[];
+  status: string;
+  ref: string | null;
 };
 
 export type UnauthEventResponse = {

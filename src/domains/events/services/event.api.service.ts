@@ -125,6 +125,8 @@ export class EventApiService {
       country: true,
       state: true,
       description: true,
+      status: true,
+      userId: true,
       tickets: { select: { name: true, price: true, soldOut: true, id: true } },
     };
 
@@ -169,7 +171,57 @@ export class EventApiService {
       take: limit,
     });
 
-    return { events, pages, total: totalEvents, page, limit };
+    const eventOwners = events.reduce(
+      (agg: { [name: string]: string }, event) => {
+        if (!event.userId) {
+          return agg;
+        }
+
+        if (!agg[event.userId]) {
+          agg[event.userId] = event.userId;
+        }
+
+        return agg;
+      },
+      {},
+    );
+
+    const virtualAccount = await this.db.virtualAccount.findMany({
+      where: { userId: { in: Object.keys(eventOwners) } },
+    });
+
+    const virtualAccountsByEventOwners = virtualAccount.reduce(
+      (agg: { [name: string]: string | null }, vAccount) => {
+        if (!agg[vAccount.userId]) {
+          agg[vAccount.userId] = vAccount.subAccountNumber;
+        }
+
+        return agg;
+      },
+      {},
+    );
+
+    const eventsWithSubAccountNumber = events.map((val) => {
+      let subAccountNumber = null;
+
+      if (val.userId && virtualAccountsByEventOwners[val.userId]) {
+        subAccountNumber = virtualAccountsByEventOwners[val.userId];
+      }
+
+      return {
+        ref: subAccountNumber,
+        ...val,
+      };
+    });
+
+    console.log(eventsWithSubAccountNumber);
+    return {
+      events: eventsWithSubAccountNumber,
+      pages,
+      total: totalEvents,
+      page,
+      limit,
+    };
   }
 
   async getAuthEvents(
@@ -219,6 +271,19 @@ export class EventApiService {
       take: limit,
     });
 
-    return { events, pages, total: totalEvents, page, limit };
+    const eventsWithSubAccountNumber = events.map((val) => {
+      return {
+        ref: null,
+        ...val,
+      };
+    });
+
+    return {
+      events: eventsWithSubAccountNumber,
+      pages,
+      total: totalEvents,
+      page,
+      limit,
+    };
   }
 }

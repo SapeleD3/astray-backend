@@ -1,12 +1,34 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiGroup } from '../../../commons/enums';
-import { UserService } from '../services';
+import {
+  AuthUser,
+  GetNipAccountDetailsPayload,
+  SaveAccountDetailsPayload,
+  UserService,
+} from '../services';
+import { AuthGuard } from '../../../commons/gaurds/user.authentication.guard';
 import {
   AuthenticatedUserResponse,
   UserSignInRequest,
   UserSignUpRequest,
 } from './dto';
+import { AuthGuardRequest } from '../../../commons';
+import {
+  GetNipAccountDetailsResponse,
+  PaystackBankList,
+} from '../../../providers';
+import { VirtualAccount } from '@prisma/client';
 
 @ApiTags(ApiGroup.User)
 @Controller(ApiGroup.User)
@@ -61,5 +83,54 @@ export class UserController {
       userSignInRequest,
     );
     return new AuthenticatedUserResponse(authenticatedUser);
+  }
+}
+
+// authenticated user routes
+@UseGuards(AuthGuard)
+@Controller({
+  path: `/auth/${ApiGroup.User}`,
+})
+export class AuthUserController {
+  constructor(private readonly userService: UserService) {}
+
+  @Get('')
+  @HttpCode(HttpStatus.OK)
+  async fetchAuthUser(@Request() request: AuthGuardRequest): Promise<AuthUser> {
+    const user = await this.userService.fetchAuthUser(request.id);
+    return user;
+  }
+
+  @Get('/banklist')
+  @HttpCode(HttpStatus.OK)
+  async fetchBankList(): Promise<PaystackBankList[]> {
+    const banklist = await this.userService.fetchValidBankList();
+    return banklist;
+  }
+
+  @Get('/NipDetails')
+  @HttpCode(HttpStatus.OK)
+  async fetchNipBankDetails(
+    @Query('accountNumber') accountNumber: string,
+    @Query('bankCode') bankCode: string,
+  ): Promise<GetNipAccountDetailsResponse> {
+    const bankDetails = await this.userService.getNipBankDetails({
+      accountNumber,
+      bankCode,
+    });
+    return bankDetails;
+  }
+
+  @Post('/save-account')
+  @HttpCode(HttpStatus.OK)
+  async saveAccountDetails(
+    @Request() request: AuthGuardRequest,
+    @Body() payload: SaveAccountDetailsPayload,
+  ): Promise<Partial<VirtualAccount>> {
+    const virtualAccount = await this.userService.saveAccountDetails(
+      request.id,
+      payload,
+    );
+    return virtualAccount;
   }
 }

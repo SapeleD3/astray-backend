@@ -1,8 +1,15 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import {
   UserLoginPayload,
   AuthenticatedUser,
   UserRegistrationPayload,
+  AuthUser,
+  GetNipAccountDetailsPayload,
+  SaveAccountDetailsPayload,
 } from './types';
 import { PrismaService } from '../../../commons/prisma.service';
 import {
@@ -12,6 +19,12 @@ import {
 } from '../../../commons';
 import dayjs from 'dayjs';
 import { ConfigService } from '@nestjs/config';
+import {
+  GetNipAccountDetailsResponse,
+  Paystack,
+  PaystackBankList,
+} from '../../../providers';
+import { VirtualAccount } from '@prisma/client';
 
 const excludePassword = (user: any) => {
   delete user.password;
@@ -23,6 +36,7 @@ export class UserService {
   constructor(
     private readonly db: PrismaService,
     private readonly configService: ConfigService,
+    private readonly paystack: Paystack,
   ) {}
 
   async userLogin(payload: UserLoginPayload): Promise<AuthenticatedUser> {
@@ -90,5 +104,66 @@ export class UserService {
     });
 
     return { token, user: excludePassword(newUser) };
+  }
+
+  async fetchAuthUser(userId: string): Promise<AuthUser> {
+    const [user, virtualAccount] = await Promise.all([
+      this.db.user.findFirst({ where: { id: userId } }),
+      this.db.virtualAccount.findFirst({ where: { userId } }),
+    ]);
+
+    if (!user) {
+      throw new UnauthorizedException('invalid token');
+    }
+
+    return {
+      user: excludePassword(user),
+      account: virtualAccount,
+    };
+  }
+
+  async fetchValidBankList(): Promise<PaystackBankList[]> {
+    const banklist = await this.paystack.getBankList();
+    return banklist;
+  }
+
+  async getNipBankDetails(
+    payload: GetNipAccountDetailsPayload,
+  ): Promise<GetNipAccountDetailsResponse> {
+    const bankDetails = await this.paystack.getNipBankDetails(payload);
+
+    if (!bankDetails) {
+      throw new BadRequestException('Invalid account number');
+    }
+
+    return bankDetails;
+  }
+
+  async saveAccountDetails(
+    userId: string,
+    payload: SaveAccountDetailsPayload,
+  ): Promise<Partial<VirtualAccount>> {
+    const { bankCode, bankName, accountName, accountNumber } = payload;
+
+    const subAccountDetails = await this.paystack.createSubAccount(payload);
+
+    if (!subAccountDetails) {
+      throw new BadRequestException('Invalid account number');
+    }
+
+    const newVirtualAccount = await this.db.virtualAccount.create({
+      data: {
+        bankCode,
+        bankName,
+        accountFullName: accountName,
+        accountNumber,
+        userId,
+        subAccountNumber: subAccountDetails.subAccountNumber,
+        createdAt: dayjs().unix(),
+        updatedAt: dayjs().unix(),
+      },
+    });
+
+    return newVirtualAccount;
   }
 }
