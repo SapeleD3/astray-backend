@@ -2,7 +2,6 @@ import { getApp } from './app.config.setup';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule } from '@nestjs/swagger';
-import 'dotenv/config';
 
 import { createSwaggerDocument, Scheduler } from './commons';
 

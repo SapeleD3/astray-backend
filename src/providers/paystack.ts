@@ -6,6 +6,7 @@ import {
   SaveAccountDetailsResponse,
 } from './types';
 import { SaveAccountDetailsPayload } from '../domains/user/services';
+import 'dotenv/config';
 
 export class Paystack {
   private PAYSTACK_BASE_URL = 'https://api.paystack.co';
