@@ -14,8 +14,6 @@ export class Paystack {
 
   constructor() {
     const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
-    console.log('KEY: ', PAYSTACK_SECRET_KEY);
-
     if (!PAYSTACK_SECRET_KEY) {
       console.log('No paystack key');
     }
