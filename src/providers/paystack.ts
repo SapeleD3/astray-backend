@@ -15,6 +15,10 @@ export class Paystack {
   constructor() {
     const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
+    if (!PAYSTACK_SECRET_KEY) {
+      console.log('No paystack key');
+    }
+
     this.axiosInstance = axios.create({
       baseURL: this.PAYSTACK_BASE_URL,
       headers: {
