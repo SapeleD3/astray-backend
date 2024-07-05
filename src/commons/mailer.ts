@@ -10,7 +10,8 @@ export class EmailService {
     };
 
     this.transporter = nodemailer.createTransport({
-      service: 'gmail', // You can use other services or SMTP details here
+      host: 'live.smtp.mailtrap.io',
+      port: 587,
       auth,
     });
   }
@@ -25,7 +26,7 @@ export class EmailService {
     html: string;
   }) {
     const mailOptions = {
-      from: 'astray@gmail.com', // Sender's email address
+      from: 'Enola from <support@astraytickets.com>', // Sender's email address
       to, // Recipient's email address
       subject,
       html,
