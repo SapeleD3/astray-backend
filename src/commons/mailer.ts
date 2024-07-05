@@ -26,7 +26,7 @@ export class EmailService {
     html: string;
   }) {
     const mailOptions = {
-      from: 'Enola from <support@astraytickets.com>', // Sender's email address
+      from: 'Astray Tickets <support@astraytickets.com>', // Sender's email address
       to, // Recipient's email address
       subject,
       html,
