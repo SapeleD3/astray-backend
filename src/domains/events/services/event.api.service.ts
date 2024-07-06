@@ -60,8 +60,16 @@ export class EventApiService {
     if (!isAdmin) {
       throw new UnauthorizedException();
     }
+    console.log(isAdmin);
 
     if (eventAction === EventAction.DELETE) {
+      // delete order because ticket and event are dependent on it
+      await this.db.order.deleteMany({ where: { eventId } });
+
+      // delete ticket because event are dependent on it
+      await this.db.ticket.deleteMany({ where: { eventId } });
+
+      // finally delete events
       await this.db.event.delete({ where: { id: eventId } });
     }
 

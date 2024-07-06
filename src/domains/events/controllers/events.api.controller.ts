@@ -124,7 +124,7 @@ export class AuthEventApiController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async getUnAuthEvents(
+  async getAuthEvents(
     @Request() request: AuthGuardRequest,
     @Query('id') id?: string,
     @Query('page') page?: number,
