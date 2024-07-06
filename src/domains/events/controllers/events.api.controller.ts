@@ -11,9 +11,11 @@ import {
 } from '@nestjs/common';
 import { ApiGroup, RouteTag } from '../../../commons/enums';
 import {
+  EventAction,
   EventApiService,
   EventCategoryResponse,
   EventCreationResponse,
+  PublishEventType,
   SeedEventCategoryResponse,
   UnauthEventResponse,
 } from '../services';
@@ -85,6 +87,39 @@ export class AuthEventApiController {
       eventCreationRequest,
     );
     return event;
+  }
+
+  @Post('/publish')
+  @HttpCode(HttpStatus.OK)
+  async publishEvent(
+    @Body() publishEventPayload: PublishEventType,
+    @Request() request: AuthGuardRequest,
+  ): Promise<string> {
+    let requiredAction = null;
+    let response = '';
+
+    if (
+      publishEventPayload.delete === true &&
+      publishEventPayload.publish === false
+    ) {
+      requiredAction = EventAction.DELETE;
+      response = 'Event deleted successfully';
+    }
+
+    if (publishEventPayload.publish === true) {
+      requiredAction = EventAction.PUBLISH;
+      response = 'Event published successfully';
+    }
+
+    if (requiredAction) {
+      await this.eventService.publishEvent(
+        request.id,
+        publishEventPayload.eventId,
+        requiredAction,
+      );
+    }
+
+    return response;
   }
 
   @Get()

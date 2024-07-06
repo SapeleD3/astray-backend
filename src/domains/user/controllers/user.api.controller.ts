@@ -87,6 +87,40 @@ export class UserController {
   }
 }
 
+@Controller({
+  path: `/${ApiGroup.User}/admin`,
+})
+export class AdminUserController {
+  constructor(private readonly userService: UserService) {}
+
+  @Post('/login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'User login endpoint.',
+  })
+  @ApiResponse({
+    description: 'User login details.',
+    status: HttpStatus.OK,
+    type: AuthenticatedUserResponse,
+  })
+  @ApiResponse({
+    description: 'Invalid parameters provided.',
+    status: HttpStatus.BAD_REQUEST,
+  })
+  @ApiResponse({
+    description: 'User not found.',
+    status: HttpStatus.NOT_FOUND,
+  })
+  async userLogin(
+    @Body() userSignInRequest: UserSignInRequest,
+  ): Promise<AuthenticatedUserResponse> {
+    const authenticatedUser = await this.userService.adminUserLogin(
+      userSignInRequest,
+    );
+    return new AuthenticatedUserResponse(authenticatedUser);
+  }
+}
+
 // authenticated user routes
 @UseGuards(AuthGuard)
 @Controller({

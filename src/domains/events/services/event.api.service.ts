@@ -6,10 +6,12 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../../commons/prisma.service';
 import {
+  EventAction,
   EventCategoryResponse,
   EventCreationPayload,
   EventCreationResponse,
   GetEventsFilter,
+  PublishEventType,
   SeedEventCategoryResponse,
   UnauthEventResponse,
 } from './types';
@@ -46,6 +48,29 @@ export class EventApiService {
   async getEventCategories(): Promise<EventCategoryResponse[]> {
     const response = await this.db.eventCategory.findMany();
     return response;
+  }
+
+  async publishEvent(
+    userId: string,
+    eventId: string,
+    eventAction: EventAction,
+  ): Promise<void> {
+    const isAdmin = await this.db.admin.findFirst({ where: { id: userId } });
+
+    if (!isAdmin) {
+      throw new UnauthorizedException();
+    }
+
+    if (eventAction === EventAction.DELETE) {
+      await this.db.event.delete({ where: { id: eventId } });
+    }
+
+    if (eventAction === EventAction.PUBLISH) {
+      await this.db.event.update({
+        where: { id: eventId },
+        data: { status: 'PUBLISHED' },
+      });
+    }
   }
 
   async createEvent(

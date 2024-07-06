@@ -26,6 +26,14 @@ model User {
   VirtualAccount VirtualAccount[]
 }
 
+model Admin {
+  id        String @unique @default(uuid())
+  email     String
+  password  String
+  createdAt Int
+  updatedAt Int
+}
+
 model VirtualAccount {
   id               String @unique @default(uuid())
   accountFullName  String

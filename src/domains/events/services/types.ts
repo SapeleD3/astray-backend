@@ -68,3 +68,14 @@ export type UnauthEventResponse = {
   limit: number;
   events: UnauthEvents[];
 };
+
+export type PublishEventType = {
+  publish: boolean;
+  delete: boolean;
+  eventId: string;
+};
+
+export enum EventAction {
+  PUBLISH = 'PUBLISH',
+  DELETE = 'DELETE',
+}

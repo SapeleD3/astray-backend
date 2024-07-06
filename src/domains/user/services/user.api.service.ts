@@ -70,6 +70,50 @@ export class UserService {
     return { token, user: excludePassword(existingUser) };
   }
 
+  async adminUserLogin(payload: UserLoginPayload): Promise<AuthenticatedUser> {
+    const { email, password } = payload;
+
+    let existingUser = await this.db.admin.findFirst({ where: { email } });
+
+    if (!existingUser && email == 'goyinpreye@gmail.com') {
+      // create default admin
+      const defaultAdminPass = this.configService.get('DEFAULT_ADMIN_PASSWORD');
+      const hash = encryptPassword(defaultAdminPass);
+      existingUser = await this.db.admin.create({
+        data: {
+          email: 'goyinpreye@gmail.com',
+          password: hash,
+          createdAt: dayjs().unix(),
+          updatedAt: dayjs().unix(),
+        },
+      });
+    }
+
+    if (!existingUser) {
+      throw new BadRequestException('User not found');
+    }
+
+    const isMatchingPassword = comparePassword({
+      password,
+      hash: existingUser.password,
+    });
+
+    if (!isMatchingPassword) {
+      throw new Error('Invalid login details');
+    }
+
+    const secret = this.configService.get('SECRET');
+    const algorithm = this.configService.get('ALGO');
+
+    const token = generateJwtToken({
+      id: existingUser.id,
+      secret,
+      algorithm,
+    });
+
+    return { token, user: excludePassword(existingUser) };
+  }
+
   async userRegistration(
     payload: UserRegistrationPayload,
   ): Promise<AuthenticatedUser> {
