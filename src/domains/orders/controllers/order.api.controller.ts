@@ -62,6 +62,7 @@ export class AuthOrderApiController {
     @Request() request: AuthGuardRequest,
     @Query('id') id?: string,
     @Query('bookingId') bookingId?: string,
+    @Query('eventId') eventId?: string,
     @Query('status') status?: string,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
@@ -72,6 +73,7 @@ export class AuthOrderApiController {
       limit: limit || 10,
       bookingId,
       status,
+      eventId,
     };
     const orders = await this.orderApiService.getOrders(request.id, filter);
     return orders;
