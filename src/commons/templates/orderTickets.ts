@@ -28,14 +28,14 @@ export const OrderTicketTemplate = `<!DOCTYPE html>
       <tr>
         <td>
           <div style="border-bottom: 0.5px solid #d9d8da">
-            <p style="color: #a227ff; font-size: 20px; font-weight: 500">
+            <p style="color: #a227ff; font-size: 20px; font-weight: 500; text-align: center">
               Astray
             </p>
           </div>
           <p style="font-size: 16px; margin-top: 24px">Hi there,</p>
           <p style="font-size: 16px">
             We hope this message finds you bursting with excitement and can't
-            wait for you have an awesome experience at
+            wait for you to have an awesome experience at
             <b>{{eventName}}.</b>
           </p>
 
@@ -62,7 +62,7 @@ export const OrderTicketTemplate = `<!DOCTYPE html>
                 >
                   Booking ID
                 </p>
-                <p style="color: #2b292f; font-size: 14px; font-weight: 700">
+                <p style="color: #2b292f; font-size: 14px; font-weight: 700; margin-left: 10px">
                   {{bookingId}}
                 </p>
               </div>
@@ -86,7 +86,7 @@ export const OrderTicketTemplate = `<!DOCTYPE html>
                 >
                   Ticket - {{ticket}} X {{quantity}}
                 </p>
-                <p style="color: #2b292f; font-size: 14px; font-weight: 500; margin: 0;">
+                <p style="color: #2b292f; font-size: 14px; font-weight: 500; margin: 0; margin-left:10px">
                   ₦{{total}}
                 </p>
               </div>
