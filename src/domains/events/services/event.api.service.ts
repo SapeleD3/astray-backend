@@ -160,7 +160,16 @@ export class EventApiService {
       description: true,
       status: true,
       userId: true,
-      tickets: { select: { name: true, price: true, soldOut: true, id: true } },
+      tickets: {
+        select: {
+          name: true,
+          price: true,
+          soldOut: true,
+          id: true,
+          sold: true,
+          quantity: true,
+        },
+      },
     };
 
     const whereQuery: any = {};
