@@ -169,6 +169,7 @@ export class EventApiService {
           id: true,
           sold: true,
           quantity: true,
+          color: true,
         },
       },
     };
