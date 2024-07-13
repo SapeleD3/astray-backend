@@ -3,6 +3,7 @@ export type EventTicketPayload = {
   quantity: number;
   price: number;
   sold: number;
+  color: string;
 };
 
 export type EventCreationPayload = {

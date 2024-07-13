@@ -84,6 +84,7 @@ model Ticket {
   name      String
   quantity  Int
   price     Float
+  color     String  @default("#282020")
   sold      Int     @default(0)
   soldOut   Boolean @default(false)
   Event     Event?  @relation(fields: [eventId], references: [id])

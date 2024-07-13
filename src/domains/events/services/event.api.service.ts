@@ -118,6 +118,7 @@ export class EventApiService {
         name: val.name,
         quantity: val.quantity,
         price: val.price,
+        color: val.color,
         userId,
         createdAt: dayjs().unix(),
         updatedAt: dayjs().unix(),
