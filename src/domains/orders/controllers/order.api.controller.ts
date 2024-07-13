@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiGroup, RouteTag } from '../../../commons/enums';
 import { OrderApiService } from '../services';
-import { generatePasswordRefDTO } from './dto';
+import { generatePasswordRefDTO, generatePaymentRefDTO } from './dto';
 import {
   CreateOrderPayload,
   GetOrderResponse,
@@ -39,11 +39,13 @@ export class OrderApiController {
   @Post('/reference')
   @HttpCode(HttpStatus.OK)
   async createPaymentReference(
-    @Body() createPaymentRefPayload: generatePasswordRefDTO,
+    @Body() createPaymentRefPayload: generatePaymentRefDTO,
   ): Promise<{ ref: string }> {
     const ref = this.orderApiService.createPaymentReference({
       amount: createPaymentRefPayload.amount,
       email: createPaymentRefPayload.email,
+      ticketId: createPaymentRefPayload.ticketId,
+      quantity: createPaymentRefPayload.quantity,
     });
     return ref;
   }

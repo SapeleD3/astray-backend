@@ -1,6 +1,8 @@
 export type PaymentRequestBody = {
   amount: number;
+  quantity: number;
   email: string;
+  ticketId: string;
 };
 
 export type OrderTicket = {

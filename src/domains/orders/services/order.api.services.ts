@@ -26,7 +26,17 @@ export class OrderApiService {
   async createPaymentReference(
     payload: PaymentRequestBody,
   ): Promise<{ ref: string }> {
-    const { amount, email } = payload;
+    const { amount, email, ticketId, quantity } = payload;
+    const ticket = await this.db.ticket.findFirst({ where: { id: ticketId } });
+    const newTotal = (ticket?.sold || 0) + quantity;
+    const ticketQuantity = ticket?.quantity as number;
+
+    if (newTotal > ticketQuantity) {
+      throw new BadRequestException(
+        'Order is quantity invalid, please check number of available tickets',
+      );
+    }
+
     const paymentRef = uuidv4().toString();
 
     await this.db.payment.create({
