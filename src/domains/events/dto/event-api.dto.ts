@@ -25,6 +25,10 @@ export class EventTicketParams {
   @IsNotEmpty()
   @IsNumber()
   readonly sold!: number;
+
+  @IsNotEmpty()
+  @IsString()
+  readonly color!: string;
 }
 
 export class EventCreationRequest {
