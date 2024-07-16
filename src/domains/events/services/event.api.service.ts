@@ -258,7 +258,6 @@ export class EventApiService {
       };
     });
 
-    console.log(eventsWithSubAccountNumber);
     return {
       events: eventsWithSubAccountNumber,
       pages,
