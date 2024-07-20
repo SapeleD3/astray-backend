@@ -34,9 +34,7 @@ export const OrderTicketTemplate = `<!DOCTYPE html>
           </div>
           <p style="font-size: 16px; margin-top: 24px">Hi there,</p>
           <p style="font-size: 16px">
-            We hope this message finds you bursting with excitement and can't
-            wait for you to have an awesome experience at
-            <b>{{eventName}}.</b>
+            Congratulations your order for tickets to <b>{{eventName}},</b> has been confirmed, check below for your booking details.
           </p>
 
           <div style="margin-top: 40px">
@@ -114,3 +112,90 @@ export const OrderTicketTemplate = `<!DOCTYPE html>
   </body>
 </html>
 `;
+
+export const eventOwnerTemplate = `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html charset=UTF-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Open sans", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <table
+      class="container"
+      align="center"
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      style="width: 100%; max-width: 500px; padding: 100px 0"
+    >
+      <tr>
+        <td>
+          <div style="border-bottom: 0.5px solid #d9d8da">
+            <p style="color: #a227ff; font-size: 20px; font-weight: 500; text-align: center">
+              Astray
+            </p>
+          </div>
+          <p style="font-size: 16px; margin-top: 24px">Hi {{name}},</p>
+          <p style="font-size: 16px">
+            This email is to notify you of a ticket sale for your event: <b>{{eventName}}</b>, Please visit the astray dashbord for more information on the booking order.
+          </p>
+
+          <div style="margin-top: 40px">
+            <p style="font-weight: 600; font-size: 16px; color: #a227ff">
+              Order Details
+            </p>
+
+            <div>
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+                <p
+                  style="
+                    padding: 0;
+                    color: #2b292f;
+                    font-size: 14px;
+                    font-weight: 400;
+                    margin: 0;
+                    text-transform: capitalize;
+                  "
+                >
+                  Ticket - {{ticket}} X {{quantity}}
+                </p>
+                <p style="color: #2b292f; font-size: 14px; font-weight: 500; margin: 0; margin-left:10px">
+                  ₦{{total}}
+                </p>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td style="margin-top: 40px; display: flex; justify-content: center; width: 100%;">
+          <div>
+            <p>Connecting you to experiences that ignite your soul.</p>
+            <p style="font-size: 12px; text-align: center">
+              With ❤️ from Astray
+            </p>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;

@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiGroup, RouteTag } from '../../../commons/enums';
 import { OrderApiService } from '../services';
-import { generatePasswordRefDTO, generatePaymentRefDTO } from './dto';
+import { generatePaymentRefDTO } from './dto';
 import {
   CreateOrderPayload,
   GetOrderResponse,

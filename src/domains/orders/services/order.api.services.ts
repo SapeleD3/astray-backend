@@ -13,7 +13,11 @@ import {
 } from '../type';
 import { Order } from '@prisma/client';
 import { customAlphabet } from 'nanoid';
-import { EmailService, OrderTicketTemplate } from '../../../commons';
+import {
+  EmailService,
+  OrderTicketTemplate,
+  eventOwnerTemplate,
+} from '../../../commons';
 import { compile } from 'handlebars';
 
 @Injectable()
@@ -115,10 +119,13 @@ export class OrderApiService {
       }),
     ]);
 
-    if (!ticket || existingOrder || !payment) {
+    if (!ticket || existingOrder || !payment || !event?.userId) {
       throw new BadRequestException('Order is invalid, please try again');
     }
     let order: Order | null = null;
+    const user = await this.db.user.findFirst({
+      where: { id: event?.userId },
+    });
 
     const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMPQRSTXY', 7);
     const bookingId = nanoid(); // generate booking ID
@@ -175,6 +182,7 @@ export class OrderApiService {
     });
 
     const template = compile(OrderTicketTemplate);
+
     const templateData = {
       eventName: event?.name,
       bookingId: bookingId,
@@ -194,6 +202,24 @@ export class OrderApiService {
       subject: 'Ticket Purchase',
       html: template(templateData),
     });
+
+    if (user?.email) {
+      const ownerTemplate = compile(eventOwnerTemplate);
+
+      const ownerTemplateData = {
+        name: user?.fullName,
+        eventName: event?.name,
+        total: payload.total,
+        ticket: ticket.name,
+        quantity: payload.quantity,
+      };
+
+      await mailer.sendMail({
+        to: user.email,
+        subject: 'NEW!! Ticket Sale',
+        html: ownerTemplate(ownerTemplateData),
+      });
+    }
 
     return { order };
   }
