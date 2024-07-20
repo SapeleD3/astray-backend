@@ -150,7 +150,7 @@ export const eventOwnerTemplate = `
           </div>
           <p style="font-size: 16px; margin-top: 24px">Hi {{name}},</p>
           <p style="font-size: 16px">
-            This email is to notify you of a ticket sale for your event: <b>{{eventName}}</b>, Please visit the astray dashbord for more information on the booking order.
+            This email is to notify you of a ticket sale for your event: <b>{{eventName}}</b>, Please visit the astray dashboard for more information on the booking order.
           </p>
 
           <div style="margin-top: 40px">
