@@ -12,18 +12,19 @@ datasource db {
 }
 
 model User {
-  id             String           @unique @default(uuid())
-  email          String
-  fullName       String
-  phoneNumber    String
-  hostName       String
-  password       String
-  createdAt      Int
-  updatedAt      Int
-  events         Event[]
-  tickets        Ticket[]
-  Order          Order[]
-  VirtualAccount VirtualAccount[]
+  id                 String               @unique @default(uuid())
+  email              String
+  fullName           String
+  phoneNumber        String
+  hostName           String
+  password           String
+  createdAt          Int
+  updatedAt          Int
+  events             Event[]
+  tickets            Ticket[]
+  Order              Order[]
+  VirtualAccount     VirtualAccount[]
+  PasswordResetTrack PasswordResetTrack[]
 }
 
 model Admin {
@@ -128,4 +129,17 @@ model Order {
   eventId   String
   User      User?   @relation(fields: [userId], references: [id])
   userId    String?
+}
+
+model PasswordResetTrack {
+  id          String  @unique @default(uuid())
+  createdAt   Int
+  updatedAt   Int
+  validBefore Int
+  email       String
+  resetCode   String
+  isArchived  Boolean @default(false)
+  isVerified  Boolean @default(false)
+  User        User?   @relation(fields: [userId], references: [id])
+  userId      String
 }

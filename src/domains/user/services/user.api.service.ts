@@ -11,10 +11,12 @@ import {
   GetNipAccountDetailsPayload,
   SaveAccountDetailsPayload,
   EditUserPayload,
+  ResetPasswordPayload,
 } from './types';
 import { PrismaService } from '../../../commons/prisma.service';
 import {
   comparePassword,
+  EmailService,
   encryptPassword,
   generateJwtToken,
 } from '../../../commons';
@@ -26,6 +28,12 @@ import {
   PaystackBankList,
 } from '../../../providers';
 import { User, VirtualAccount } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
+import { compile } from 'handlebars';
+import {
+  passwordResetConfirmationTemplate,
+  passwordResetTemplate,
+} from '../../../commons/templates/passwordReset';
 
 const excludePassword = (user: any) => {
   delete user.password;
@@ -68,6 +76,124 @@ export class UserService {
     });
 
     return { token, user: excludePassword(existingUser) };
+  }
+
+  async recoverPassword(email: string): Promise<any> {
+    const existingUser = await this.db.user.findFirst({ where: { email } });
+
+    if (!existingUser) {
+      throw new BadRequestException('User does not exists');
+    }
+
+    const existingPasswordResetTrack =
+      await this.db.passwordResetTrack.findFirst({
+        where: {
+          email,
+          isVerified: false,
+          isArchived: false,
+          validBefore: { gte: dayjs().unix() },
+        },
+      });
+
+    if (existingPasswordResetTrack) {
+      console.log('EMAIL: ', existingPasswordResetTrack);
+      await this.db.passwordResetTrack.update({
+        where: { id: existingPasswordResetTrack.id },
+        data: { isArchived: true },
+      });
+    }
+
+    const resetCode = uuidv4().toString();
+    const passwordResetLink = `https://www.astraytickets.com/password-reset?email=${existingUser.email}&reset_code=${resetCode}`;
+    const templateData = {
+      name: existingUser.fullName,
+      passwordResetLink,
+    };
+
+    const template = compile(passwordResetTemplate);
+
+    // Send email of booking Id
+    const mailer = new EmailService();
+    await mailer.sendMail({
+      to: existingUser.email,
+      subject: 'Password Reset',
+      html: template(templateData),
+    });
+
+    await this.db.passwordResetTrack.create({
+      data: {
+        createdAt: dayjs().unix(),
+        updatedAt: dayjs().unix(),
+        validBefore: dayjs().add(1, 'hours').unix(),
+        email,
+        resetCode,
+        userId: existingUser.id,
+      },
+    });
+
+    return {
+      data: null,
+      message: 'please check your email, for details on reseting your password',
+    };
+  }
+
+  async resetPassword(payload: ResetPasswordPayload): Promise<any> {
+    const existingPasswordResetTrack =
+      await this.db.passwordResetTrack.findFirst({
+        where: {
+          resetCode: payload.resetCode,
+          isVerified: false,
+          validBefore: { gte: dayjs().unix() },
+        },
+      });
+
+    if (!existingPasswordResetTrack) {
+      throw new BadRequestException(
+        'invalid reset code, please restart the forgot password flow',
+      );
+    }
+
+    const user = await this.db.user.findFirst({
+      where: { id: existingPasswordResetTrack.userId },
+    });
+
+    if (!user) {
+      throw new BadRequestException(
+        'invalid reset code, please restart the forgot password flow',
+      );
+    }
+
+    await this.db.passwordResetTrack.update({
+      where: { id: existingPasswordResetTrack.id },
+      data: {
+        isVerified: true,
+        isArchived: true,
+        updatedAt: dayjs().unix(),
+      },
+    });
+
+    await this.db.user.update({
+      where: { id: user.id },
+      data: {
+        password: payload.password,
+        updatedAt: dayjs().unix(),
+      },
+    });
+
+    const templateData = {
+      name: user.fullName,
+    };
+    const template = compile(passwordResetConfirmationTemplate);
+
+    // Send email of booking Id
+    const mailer = new EmailService();
+    await mailer.sendMail({
+      to: user.email,
+      subject: 'Password Reset Successful',
+      html: template(templateData),
+    });
+
+    return { data: null, message: 'password reset successful' };
   }
 
   async adminUserLogin(payload: UserLoginPayload): Promise<AuthenticatedUser> {

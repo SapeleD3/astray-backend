@@ -40,3 +40,9 @@ export type EditUserPayload = {
   hostName: string;
   phoneNumber: string;
 };
+
+export type ResetPasswordPayload = {
+  email: string;
+  resetCode: string;
+  password: string;
+};

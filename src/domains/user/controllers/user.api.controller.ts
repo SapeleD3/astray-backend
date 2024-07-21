@@ -21,6 +21,8 @@ import {
 import { AuthGuard } from '../../../commons/gaurds/user.authentication.guard';
 import {
   AuthenticatedUserResponse,
+  ForgetPassword,
+  ResetPassword,
   UserSignInRequest,
   UserSignUpRequest,
 } from './dto';
@@ -84,6 +86,22 @@ export class UserController {
       userSignInRequest,
     );
     return new AuthenticatedUserResponse(authenticatedUser);
+  }
+
+  @Post('/forget-password')
+  @HttpCode(HttpStatus.OK)
+  async forgetPassword(@Body() recoverPassword: ForgetPassword): Promise<any> {
+    const response = await this.userService.recoverPassword(
+      recoverPassword.email,
+    );
+    return response;
+  }
+
+  @Post('/reset-password')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() passwordReset: ResetPassword): Promise<any> {
+    const response = await this.userService.resetPassword(passwordReset);
+    return response;
   }
 }
 

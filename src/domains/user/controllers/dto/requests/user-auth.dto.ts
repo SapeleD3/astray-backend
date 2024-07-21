@@ -76,3 +76,49 @@ export class UserSignUpRequest {
   @IsString()
   readonly password!: string;
 }
+
+export class ForgetPassword {
+  @ApiProperty({
+    description: 'User email',
+    example: 'test@gmail.com',
+    type: String,
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  @Length(0, 255)
+  readonly email!: string;
+}
+
+export class ResetPassword {
+  @ApiProperty({
+    description: 'User email',
+    example: 'test@gmail.com',
+    type: String,
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  @Length(0, 255)
+  readonly email!: string;
+
+  @ApiProperty({
+    description: 'Rest Code',
+    type: String,
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  @Length(0, 255)
+  readonly resetCode!: string;
+
+  @ApiProperty({
+    description: 'User password',
+    example: 'Password@1234',
+    type: String,
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  readonly password!: string;
+}
