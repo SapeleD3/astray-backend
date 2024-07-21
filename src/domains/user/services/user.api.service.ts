@@ -172,10 +172,11 @@ export class UserService {
       },
     });
 
+    const hash = encryptPassword(payload.password);
     await this.db.user.update({
       where: { id: user.id },
       data: {
-        password: payload.password,
+        password: hash,
         updatedAt: dayjs().unix(),
       },
     });
