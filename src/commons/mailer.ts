@@ -20,16 +20,19 @@ export class EmailService {
     to,
     subject = 'Hello World',
     html,
+    attachment = [],
   }: {
     to: string;
     subject: string;
     html: string;
+    attachment?: any;
   }) {
     const mailOptions = {
       from: 'Astray Tickets <support@astraytickets.com>', // Sender's email address
       to, // Recipient's email address
       subject,
       html,
+      attachments: attachment,
     };
 
     this.transporter.sendMail(mailOptions, (error, info) => {

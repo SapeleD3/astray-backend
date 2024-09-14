@@ -69,7 +69,7 @@ export const OrderTicketTemplate = `<!DOCTYPE html>
             </div>
             <tr>
               <td style="margin-top: 40px; display: flex; justify-content: center; width: 100%;">
-                <img src={{qrCode}} alt="Qr">
+                <img src="cid:qrcode" alt="Qr" />
               </td>
             </tr>
           </div>

@@ -183,7 +183,7 @@ export class OrderApiService {
     });
 
     const template = compile(OrderTicketTemplate);
-    const codeUrl = await QRCode.toDataURL(bookingId);
+    const codeUrl = await QRCode.toDataURL(String(bookingId));
 
     const templateData = {
       eventName: event?.name,
@@ -204,6 +204,13 @@ export class OrderApiService {
       to: payload.email,
       subject: 'Ticket Purchase',
       html: template(templateData),
+      attachment: [
+        {
+          filename: 'ticketQrCode.png',
+          path: codeUrl,
+          cid: 'qrcode', //same cid value as in the html img src
+        },
+      ],
     });
 
     if (user?.email) {
