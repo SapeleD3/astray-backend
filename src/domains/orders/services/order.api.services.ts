@@ -19,6 +19,7 @@ import {
   eventOwnerTemplate,
 } from '../../../commons';
 import { compile } from 'handlebars';
+import QRCode from 'qrcode';
 
 @Injectable()
 export class OrderApiService {
@@ -183,6 +184,8 @@ export class OrderApiService {
 
     const template = compile(OrderTicketTemplate);
 
+    const codeUrl = await QRCode.toDataURL(bookingId);
+
     const templateData = {
       eventName: event?.name,
       bookingId: bookingId,
@@ -193,6 +196,7 @@ export class OrderApiService {
       ticket: ticket.name,
       quantity: payload.quantity,
       start: dayjs(event?.startDate).format('hh:mm A, DD MMMM YYYY.'),
+      qrCode: codeUrl,
     };
 
     // Send email of booking Id

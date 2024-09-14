@@ -56,28 +56,6 @@ export const OrderTicketTemplate = `<!DOCTYPE html>
                     color: #2b292f;
                     font-size: 14px;
                     font-weight: 400;
-                  "
-                >
-                  Booking ID
-                </p>
-                <p style="color: #2b292f; font-size: 14px; font-weight: 700; margin-left: 10px">
-                  {{bookingId}}
-                </p>
-              </div>
-
-              <div
-                style="
-                  display: flex;
-                  justify-content: space-between;
-                  align-items: center;
-                "
-              >
-                <p
-                  style="
-                    padding: 0;
-                    color: #2b292f;
-                    font-size: 14px;
-                    font-weight: 400;
                     margin: 0;
                     text-transform: capitalize;
                   "
@@ -89,6 +67,11 @@ export const OrderTicketTemplate = `<!DOCTYPE html>
                 </p>
               </div>
             </div>
+            <tr>
+              <td style="margin-top: 40px; display: flex; justify-content: center; width: 100%;">
+                <img src={{qrCode}} alt="Qr">
+              </td>
+            </tr>
           </div>
         </td>
       </tr>

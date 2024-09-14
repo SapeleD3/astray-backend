@@ -39,6 +39,7 @@
     "nanoid": "^3.3.7",
     "node-cron": "3.0.2",
     "nodemailer": "^6.9.13",
+    "qrcode": "^1.5.4",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
     "uuid": "^9.0.1"
@@ -55,6 +56,7 @@
     "@types/node": "18.15.11",
     "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^6.4.14",
+    "@types/qrcode": "^1.5.5",
     "@types/supertest": "^2.0.11",
     "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
