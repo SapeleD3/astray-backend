@@ -183,7 +183,6 @@ export class OrderApiService {
     });
 
     const template = compile(OrderTicketTemplate);
-
     const codeUrl = await QRCode.toDataURL(bookingId);
 
     const templateData = {
