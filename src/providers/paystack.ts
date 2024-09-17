@@ -88,7 +88,7 @@ export class Paystack {
         business_name: accountName,
         bank_code: bankCode,
         account_number: accountNumber,
-        percentage_charge: 1.5, //Fixed Percentage,
+        percentage_charge: 3.5, //Fixed Percentage,
       });
 
       if (data?.status === true) {
