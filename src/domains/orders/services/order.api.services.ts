@@ -430,13 +430,21 @@ export class OrderApiService {
     return { orders, pages, total: totalOrders, page, limit };
   }
 
-  async getPayments(filter: GetPaymentFilter): Promise<GetPaymentResponse> {
-    if (!filter.ticketId) {
-      throw new BadRequestException(
-        'Ticket ID is required for getting payments',
-      );
+  async getPayments(
+    userId: string,
+    filter: GetPaymentFilter,
+  ): Promise<GetPaymentResponse> {
+    const whereQuery: any = {};
+
+    if (filter?.ticketId) {
+      whereQuery['ticketId'] = filter.ticketId;
+    } else {
+      const allUserTickets = await this.db.ticket.findMany({
+        where: { userId: userId },
+      });
+
+      whereQuery['ticketId'] = { in: allUserTickets.map((val) => val.id) };
     }
-    const whereQuery: any = { ticketId: filter.ticketId };
 
     if (filter?.id) whereQuery['id'] = filter.id;
     if (filter?.status) whereQuery['status'] = filter.status;

@@ -100,7 +100,7 @@ export class AuthOrderApiController {
       status,
     };
 
-    const payment = await this.orderApiService.getPayments(filter);
+    const payment = await this.orderApiService.getPayments(request.id, filter);
     return payment;
   }
 
