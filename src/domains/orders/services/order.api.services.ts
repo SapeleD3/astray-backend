@@ -87,13 +87,23 @@ export class OrderApiService {
       throw new BadRequestException('TicketId is invalid, please try again');
     }
 
+    if (payment.status === 'SUCCESS') {
+      throw new BadRequestException(
+        'Payment has already been verified and order created',
+      );
+    }
+
     // VERIFY ORDER
     const paymentverification = await this.paystack.verifyPayment(ref);
+    console.log({ ticketId, status: paymentverification.status });
     const is_verified = paymentverification.status === 'success';
 
     if (!is_verified) {
       return { message: 'Order still pending', status: payment.status };
     }
+
+    // HANDLE FAILED TRANSACTION
+    const is_failed = paymentverification.status === 'failed';
 
     let order: Order | null = null;
     const user = await this.db.user.findFirst({
