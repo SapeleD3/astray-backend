@@ -7,9 +7,12 @@ import {
   CreateOrderPayload,
   GetOrderResponse,
   GetOrdersFilter,
+  GetPaymentFilter,
+  GetPaymentResponse,
   OrderCheckInPayload,
   OrderCheckInResponse,
   PaymentRequestBody,
+  VerifyPaymentRequestBody,
 } from '../type';
 import { Order } from '@prisma/client';
 import { customAlphabet } from 'nanoid';
@@ -20,12 +23,14 @@ import {
 } from '../../../commons';
 import { compile } from 'handlebars';
 import QRCode from 'qrcode';
+import { Paystack } from '../../../providers';
 
 @Injectable()
 export class OrderApiService {
   constructor(
     private readonly db: PrismaService,
     private readonly configService: ConfigService,
+    private readonly paystack: Paystack,
   ) {}
 
   async createPaymentReference(
@@ -51,10 +56,154 @@ export class OrderApiService {
         ref: paymentRef,
         amount,
         email,
+        quantity,
+        ticketId,
       },
     });
 
     return { ref: paymentRef };
+  }
+
+  async verifyPaymentReference(
+    payload: VerifyPaymentRequestBody,
+  ): Promise<{ message: string; status: string }> {
+    const { ticketId, ref } = payload;
+    const ticket = await this.db.ticket.findFirst({ where: { id: ticketId } });
+
+    if (!ticket) {
+      throw new BadRequestException('TicketId is invalid, please try again');
+    }
+
+    const [event, payment] = await Promise.all([
+      this.db.event.findFirst({
+        where: {
+          id: ticket?.eventId || '',
+        },
+      }),
+      this.db.payment.findFirst({ where: { ticketId: ticketId, ref: ref } }),
+    ]);
+
+    if (!event || !payment) {
+      throw new BadRequestException('TicketId is invalid, please try again');
+    }
+
+    // VERIFY ORDER
+    const paymentverification = await this.paystack.verifyPayment(ref);
+    const is_verified = paymentverification.status === 'success';
+
+    if (!is_verified) {
+      return { message: 'Order still pending', status: payment.status };
+    }
+
+    let order: Order | null = null;
+    const user = await this.db.user.findFirst({
+      where: { id: event?.userId || '' },
+    });
+
+    const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMPQRSTXY', 7);
+    const bookingId = nanoid(); // generate booking ID
+
+    await this.db.$transaction(async (tx) => {
+      const updatedTicket = await tx.ticket.update({
+        data: {
+          sold: { increment: payment.quantity || 0 },
+          updatedAt: dayjs().unix(),
+        },
+        where: { id: ticketId },
+      });
+
+      if (updatedTicket.sold > updatedTicket.quantity) {
+        throw new BadRequestException(
+          'Order is quantity invalid, please check number of available tickets',
+        );
+      }
+
+      if (updatedTicket.sold === updatedTicket.quantity) {
+        await tx.ticket.update({
+          data: {
+            soldOut: true,
+            updatedAt: dayjs().unix(),
+          },
+          where: { id: ticketId },
+        });
+      }
+
+      await tx.payment.update({
+        data: {
+          status: 'SUCCESS',
+          updatedAt: dayjs().unix(),
+        },
+        where: { email: payment.email, ref: ref },
+      });
+
+      order = await tx.order.create({
+        data: {
+          bookingId,
+          email: payment.email,
+          quantity: payment.quantity || 0,
+          ref: ref,
+          total: payment.amount,
+          checkedIn: 0,
+          fullyCheckedIn: false,
+          paymentId: payment.id,
+          ticketId: ticket.id,
+          eventId: ticket?.eventId || event.id,
+          status: 'SUCCESS',
+          userId: event?.userId, // owner of the event
+        },
+      });
+    });
+
+    const template = compile(OrderTicketTemplate);
+    const codeUrl = await QRCode.toDataURL(String(bookingId));
+
+    const templateData = {
+      eventName: event?.name,
+      bookingId: bookingId,
+      total: payment.amount,
+      country: event?.country,
+      state: event?.state,
+      address: event?.address,
+      ticket: ticket.name,
+      quantity: payment.quantity,
+      start: dayjs(event?.startDate).format('hh:mm A, DD MMMM YYYY.'),
+      qrCode: codeUrl,
+    };
+
+    // Send email of booking Id
+    const mailer = new EmailService();
+    await mailer.sendMail({
+      to: payment.email,
+      subject: 'Ticket Purchase',
+      html: template(templateData),
+      attachment: [
+        {
+          filename: 'ticketQrCode.png',
+          path: codeUrl,
+          cid: 'qrcode', //same cid value as in the html img src
+        },
+      ],
+    });
+
+    if (user?.email) {
+      const ownerTemplate = compile(eventOwnerTemplate);
+
+      const ownerTemplateData = {
+        name: user?.fullName,
+        eventName: event?.name,
+        total: payment.amount,
+        ticket: ticket.name,
+        quantity: payment.quantity,
+      };
+
+      await mailer.sendMail({
+        to: user.email,
+        subject: 'NEW!! Ticket Sale',
+        html: ownerTemplate(ownerTemplateData),
+      });
+    }
+
+    return { message: 'Payment successful', status: 'SUCCESS' };
   }
 
   async orderCheckIn(
@@ -269,5 +418,41 @@ export class OrderApiService {
     });
 
     return { orders, pages, total: totalOrders, page, limit };
+  }
+
+  async getPayments(filter: GetPaymentFilter): Promise<GetPaymentResponse> {
+    if (!filter.ticketId) {
+      throw new BadRequestException(
+        'Ticket ID is required for getting payments',
+      );
+    }
+    const whereQuery: any = { ticketId: filter.ticketId };
+
+    if (filter?.id) whereQuery['id'] = filter.id;
+    if (filter?.status) whereQuery['status'] = filter.status;
+
+    const { limit, page } = filter;
+    let totalPayments = 0;
+
+    console.log('where: ', whereQuery);
+
+    try {
+      totalPayments = await this.db.payment.count({
+        where: whereQuery,
+      });
+    } catch (error) {
+      return { payment: [], pages: 0, total: totalPayments, page, limit };
+    }
+
+    const pages = Math.ceil(totalPayments / limit);
+    const offset = limit * (page - 1) || 0;
+
+    const payment = await this.db.payment.findMany({
+      where: whereQuery,
+      skip: offset,
+      take: limit,
+    });
+
+    return { payment, pages, total: totalPayments, page, limit };
   }
 }

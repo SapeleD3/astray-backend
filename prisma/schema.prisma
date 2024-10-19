@@ -103,6 +103,8 @@ model Payment {
   amount    Float
   email     String
   status    String  @default("PENDING")
+  ticketId  String? @default("PENDING")
+  quantity  Int?    @default(0)
   Order     Order[]
 }
 

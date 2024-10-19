@@ -73,3 +73,23 @@ export class generatePaymentRefDTO {
   @IsNumber()
   readonly quantity!: number;
 }
+
+export class verifyPaymentRefDTO {
+  @ApiProperty({
+    description: 'Payment ref id',
+    type: String,
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  readonly ref!: string;
+
+  @ApiProperty({
+    description: 'Event ticket id',
+    type: String,
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  readonly ticketId!: string;
+}

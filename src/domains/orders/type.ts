@@ -5,6 +5,11 @@ export type PaymentRequestBody = {
   ticketId: string;
 };
 
+export type VerifyPaymentRequestBody = {
+  ref: string;
+  ticketId: string;
+};
+
 export type OrderTicket = {
   id: string;
   name: string;
@@ -30,12 +35,28 @@ export type GetOrdersFilter = {
   limit: number;
 };
 
+export type GetPaymentFilter = {
+  ticketId?: string;
+  id?: string;
+  page: number;
+  limit: number;
+  status?: string;
+};
+
 export type GetOrderResponse = {
   pages: number;
   total: number;
   page: number;
   limit: number;
   orders: any[];
+};
+
+export type GetPaymentResponse = {
+  pages: number;
+  total: number;
+  page: number;
+  limit: number;
+  payment: any[];
 };
 
 export type OrderCheckInPayload = {

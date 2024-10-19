@@ -11,10 +11,11 @@ import {
 } from '@nestjs/common';
 import { ApiGroup, RouteTag } from '../../../commons/enums';
 import { OrderApiService } from '../services';
-import { generatePaymentRefDTO } from './dto';
+import { generatePaymentRefDTO, verifyPaymentRefDTO } from './dto';
 import {
   CreateOrderPayload,
   GetOrderResponse,
+  GetPaymentResponse,
   OrderCheckInPayload,
   OrderCheckInResponse,
 } from '../type';
@@ -81,6 +82,28 @@ export class AuthOrderApiController {
     return orders;
   }
 
+  @Get('/payments')
+  @HttpCode(HttpStatus.OK)
+  async getPaymentByTicketId(
+    @Request() request: AuthGuardRequest,
+    @Query('ticketId') ticketId: string,
+    @Query('id') id?: string,
+    @Query('status') status?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ): Promise<GetPaymentResponse> {
+    const filter = {
+      ticketId,
+      id,
+      page: page || 1,
+      limit: limit || 10,
+      status,
+    };
+
+    const payment = await this.orderApiService.getPayments(filter);
+    return payment;
+  }
+
   @Post('/check-in')
   @HttpCode(HttpStatus.OK)
   async orderCheckIn(
@@ -93,5 +116,17 @@ export class AuthOrderApiController {
     );
 
     return response;
+  }
+
+  @Post('/verify')
+  @HttpCode(HttpStatus.OK)
+  async createPaymentReference(
+    @Body() verifyPaymentRefPayload: verifyPaymentRefDTO,
+  ): Promise<{ message: string; status: string }> {
+    const ref = this.orderApiService.verifyPaymentReference({
+      ticketId: verifyPaymentRefPayload.ticketId,
+      ref: verifyPaymentRefPayload.ref,
+    });
+    return ref;
   }
 }

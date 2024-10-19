@@ -103,4 +103,23 @@ export class Paystack {
 
     return subAccountDetails;
   }
+
+  async verifyPayment(ref: string): Promise<any> {
+    let paymentRefResponse: any;
+
+    try {
+      const { data } = await this.axiosInstance.get(
+        `/transaction/verify/${ref}`,
+      );
+
+      if (data?.status === true) {
+        const verifyPaymentRefResponse = data.data;
+        paymentRefResponse = verifyPaymentRefResponse;
+      }
+    } catch (error) {
+      console.log('error creating subaccount: ', error);
+    }
+
+    return paymentRefResponse;
+  }
 }
