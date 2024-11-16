@@ -79,4 +79,5 @@ export type PublishEventType = {
 export enum EventAction {
   PUBLISH = 'PUBLISH',
   DELETE = 'DELETE',
+  UNPUBLISH = 'UNPUBLISH',
 }

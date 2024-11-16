@@ -10,6 +10,7 @@ import {
   Query,
   Put,
   Param,
+  Delete,
 } from '@nestjs/common';
 import { ApiGroup, RouteTag } from '../../../commons/enums';
 import {
@@ -179,6 +180,33 @@ export class AuthEventApiController {
       eventId,
       ticketid,
       eventTicketupdateRequest,
+    );
+
+    return updatedEvent;
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  async deleteEvent(
+    @Param('id') id: string,
+    @Request() request: AuthGuardRequest,
+  ): Promise<Partial<AsEvent>> {
+    const updatedEvent = await this.eventService.deleteEvent(request.id, id);
+
+    return updatedEvent;
+  }
+
+  @Delete(':eventId/ticket/:ticketid')
+  @HttpCode(HttpStatus.OK)
+  async deletEventTicket(
+    @Param('eventId') eventId: string,
+    @Param('ticketid') ticketid: string,
+    @Request() request: AuthGuardRequest,
+  ): Promise<Partial<Ticket>> {
+    const updatedEvent = await this.eventService.deleteEventTicket(
+      request.id,
+      eventId,
+      ticketid,
     );
 
     return updatedEvent;

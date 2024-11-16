@@ -69,6 +69,7 @@ model Event {
   startDate       String
   state           String
   image           String
+  isDeleted       Boolean        @default(false)
   status          String         @default("DRAFT")
   tickets         Ticket[]
   User            User?          @relation(fields: [userId], references: [id])
@@ -87,6 +88,7 @@ model Ticket {
   price     Float
   color     String  @default("#282020")
   sold      Int     @default(0)
+  isDeleted Boolean @default(false)
   soldOut   Boolean @default(false)
   Event     Event?  @relation(fields: [eventId], references: [id])
   eventId   String?

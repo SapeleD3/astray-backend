@@ -60,7 +60,6 @@ export class EventApiService {
     if (!isAdmin) {
       throw new UnauthorizedException();
     }
-    console.log(isAdmin);
 
     if (eventAction === EventAction.DELETE) {
       // delete order because ticket and event are dependent on it
@@ -77,6 +76,13 @@ export class EventApiService {
       await this.db.event.update({
         where: { id: eventId },
         data: { status: 'PUBLISHED' },
+      });
+    }
+
+    if (eventAction === EventAction.UNPUBLISH) {
+      await this.db.event.update({
+        where: { id: eventId },
+        data: { status: 'DRAFT' },
       });
     }
   }
@@ -174,7 +180,7 @@ export class EventApiService {
       },
     };
 
-    const whereQuery: any = {};
+    const whereQuery: any = { isDeleted: false };
 
     if (filter?.id) whereQuery['id'] = filter.id;
     if (filter?.status) whereQuery['status'] = filter.status;
@@ -273,6 +279,7 @@ export class EventApiService {
   ): Promise<UnauthEventResponse> {
     const whereQuery: any = {
       userId,
+      isDeleted: false,
     };
 
     if (filter?.id) whereQuery['id'] = filter.id;
@@ -309,7 +316,7 @@ export class EventApiService {
 
     const events = await this.db.event.findMany({
       where: whereQuery,
-      include: { tickets: true },
+      include: { tickets: { where: { isDeleted: false } } },
       skip: offset,
       take: limit,
     });
@@ -336,7 +343,7 @@ export class EventApiService {
     updateData: Partial<AsEvent>,
   ): Promise<Partial<AsEvent>> {
     const existingEvent = await this.db.event.findFirst({
-      where: { id: eventId, userId },
+      where: { id: eventId, userId, isDeleted: false },
     });
 
     if (!existingEvent) {
@@ -357,8 +364,7 @@ export class EventApiService {
     ticketId: string,
     updateData: Partial<Ticket>,
   ): Promise<Partial<Ticket>> {
-    console.log({ eventId, ticketId });
-    const wherCondition = { id: ticketId, eventId, userId };
+    const wherCondition = { id: ticketId, eventId, userId, isDeleted: false };
     const existingEventTicket = await this.db.ticket.findFirst({
       where: wherCondition,
     });
@@ -370,6 +376,54 @@ export class EventApiService {
     const ticket = await this.db.ticket.update({
       where: wherCondition,
       data: updateData,
+    });
+
+    return ticket;
+  }
+
+  async deleteEvent(
+    userId: string,
+    eventId: string,
+  ): Promise<Partial<AsEvent>> {
+    const existingEvent = await this.db.event.findFirst({
+      where: { id: eventId, userId },
+    });
+
+    if (!existingEvent) {
+      throw new BadRequestException('invalid event id');
+    }
+
+    if (existingEvent.status === 'PUBLISHED') {
+      throw new BadRequestException(
+        'event is currently published, please contact support for deleting already published events',
+      );
+    }
+
+    const event = await this.db.event.update({
+      where: { id: eventId, userId },
+      data: { isDeleted: true, id: `deleted-${eventId}` },
+    });
+
+    return event;
+  }
+
+  async deleteEventTicket(
+    userId: string,
+    eventId: string,
+    ticketId: string,
+  ): Promise<Partial<Ticket>> {
+    const wherCondition = { id: ticketId, eventId, userId };
+    const existingEventTicket = await this.db.ticket.findFirst({
+      where: wherCondition,
+    });
+
+    if (!existingEventTicket) {
+      throw new BadRequestException('invalid ticket id');
+    }
+
+    const ticket = await this.db.ticket.update({
+      where: wherCondition,
+      data: { isDeleted: true, id: `deleted-${ticketId}` },
     });
 
     return ticket;
