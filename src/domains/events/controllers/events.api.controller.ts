@@ -115,6 +115,14 @@ export class AuthEventApiController {
       response = 'Event published successfully';
     }
 
+    if (
+      publishEventPayload.delete === false &&
+      publishEventPayload.publish === false
+    ) {
+      requiredAction = EventAction.UNPUBLISH;
+      response = 'Event unpublished successfully';
+    }
+
     if (requiredAction) {
       await this.eventService.publishEvent(
         request.id,
