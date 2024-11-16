@@ -8,6 +8,8 @@ import {
   UseGuards,
   Request,
   Query,
+  Put,
+  Param,
 } from '@nestjs/common';
 import { ApiGroup, RouteTag } from '../../../commons/enums';
 import {
@@ -22,6 +24,7 @@ import {
 import { EventCreationRequest } from '../dto';
 import { AuthGuard } from '../../../commons/gaurds/user.authentication.guard';
 import { AuthGuardRequest } from '../../../commons';
+import { Event as AsEvent } from '@prisma/client';
 
 @Controller({
   path: `${RouteTag.API}/${ApiGroup.Event}`,
@@ -145,5 +148,21 @@ export class AuthEventApiController {
     };
     const event = await this.eventService.getAuthEvents(request.id, filter);
     return event;
+  }
+
+  @Put(':id')
+  @HttpCode(HttpStatus.OK)
+  async updateEvent(
+    @Param('id') id: string,
+    @Body() eventupdateRequest: Partial<AsEvent>,
+    @Request() request: AuthGuardRequest,
+  ): Promise<Partial<AsEvent>> {
+    const updatedEvent = await this.eventService.updateEvent(
+      request.id,
+      id,
+      eventupdateRequest,
+    );
+
+    return updatedEvent;
   }
 }

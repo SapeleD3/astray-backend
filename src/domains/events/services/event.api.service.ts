@@ -11,12 +11,12 @@ import {
   EventCreationPayload,
   EventCreationResponse,
   GetEventsFilter,
-  PublishEventType,
   SeedEventCategoryResponse,
   UnauthEventResponse,
 } from './types';
 import { eventCategories } from './constants';
 import dayjs from 'dayjs';
+import { Event as AsEvent } from '@prisma/client';
 
 @Injectable()
 export class EventApiService {
@@ -328,5 +328,26 @@ export class EventApiService {
       page,
       limit,
     };
+  }
+
+  async updateEvent(
+    userId: string,
+    eventId: string,
+    updateData: Partial<AsEvent>,
+  ): Promise<Partial<AsEvent>> {
+    const existingEvent = await this.db.event.findFirst({
+      where: { id: eventId, userId },
+    });
+
+    if (!existingEvent) {
+      throw new BadRequestException('invalid event id');
+    }
+
+    const event = await this.db.event.update({
+      where: { id: eventId, userId },
+      data: updateData,
+    });
+
+    return event;
   }
 }
