@@ -16,7 +16,7 @@ import {
 } from './types';
 import { eventCategories } from './constants';
 import dayjs from 'dayjs';
-import { Event as AsEvent } from '@prisma/client';
+import { Event as AsEvent, Ticket } from '@prisma/client';
 
 @Injectable()
 export class EventApiService {
@@ -349,5 +349,29 @@ export class EventApiService {
     });
 
     return event;
+  }
+
+  async updateEventTicket(
+    userId: string,
+    eventId: string,
+    ticketId: string,
+    updateData: Partial<Ticket>,
+  ): Promise<Partial<Ticket>> {
+    console.log({ eventId, ticketId });
+    const wherCondition = { id: ticketId, eventId, userId };
+    const existingEventTicket = await this.db.ticket.findFirst({
+      where: wherCondition,
+    });
+
+    if (!existingEventTicket) {
+      throw new BadRequestException('invalid ticket id');
+    }
+
+    const ticket = await this.db.ticket.update({
+      where: wherCondition,
+      data: updateData,
+    });
+
+    return ticket;
   }
 }

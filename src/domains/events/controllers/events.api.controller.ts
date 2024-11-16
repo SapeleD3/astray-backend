@@ -24,7 +24,7 @@ import {
 import { EventCreationRequest } from '../dto';
 import { AuthGuard } from '../../../commons/gaurds/user.authentication.guard';
 import { AuthGuardRequest } from '../../../commons';
-import { Event as AsEvent } from '@prisma/client';
+import { Event as AsEvent, Ticket } from '@prisma/client';
 
 @Controller({
   path: `${RouteTag.API}/${ApiGroup.Event}`,
@@ -161,6 +161,24 @@ export class AuthEventApiController {
       request.id,
       id,
       eventupdateRequest,
+    );
+
+    return updatedEvent;
+  }
+
+  @Put(':eventId/ticket/:ticketid')
+  @HttpCode(HttpStatus.OK)
+  async updateEventTicket(
+    @Param('eventId') eventId: string,
+    @Param('ticketid') ticketid: string,
+    @Body() eventTicketupdateRequest: Partial<Ticket>,
+    @Request() request: AuthGuardRequest,
+  ): Promise<Partial<Ticket>> {
+    const updatedEvent = await this.eventService.updateEventTicket(
+      request.id,
+      eventId,
+      ticketid,
+      eventTicketupdateRequest,
     );
 
     return updatedEvent;
